@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
+import { motion } from 'framer-motion';
 import { 
   ShoppingCartIcon, 
   UserIcon, 
@@ -17,7 +19,8 @@ import SearchBar from './SearchBar';
 
 const Navbar = () => {
   const { currentUser, logout } = useAuth() || {};
-  const { cartItems } = useCart() || {};
+  const { cart, getItemCount } = useCart() || {};
+  const { wishlist } = useWishlist() || {};
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
@@ -57,13 +60,16 @@ const Navbar = () => {
     return location.pathname === path;
   };
 
+  const itemCount = getItemCount ? getItemCount() : 0;
+  const wishlistItemCount = wishlist ? wishlist.length : 0;
+
   return (
-    <nav className="bg-white shadow-md fixed w-full z-50">
+    <nav className="bg-primary-500 shadow-md fixed w-full z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo and Brand */}
           <div className="flex-shrink-0">
-            <Link to="/" className="text-2xl font-bold text-primary-600 hover:text-primary-700 transition-colors">
+            <Link to="/" className="text-2xl font-bold text-white hover:text-primary-100 transition-colors">
               auDio App
             </Link>
           </div>
@@ -76,8 +82,8 @@ const Navbar = () => {
                 to={item.href}
                 className={`px-3 py-2 text-sm font-medium transition-colors ${
                   isActive(item.href)
-                    ? 'text-primary-600 border-b-2 border-primary-600'
-                    : 'text-gray-600 hover:text-primary-600'
+                    ? 'text-white border-b-2 border-white'
+                    : 'text-primary-100 hover:text-white'
                 }`}
               >
                 {item.name}
@@ -94,24 +100,51 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-6">
             <Link 
               to="/wishlist" 
-              className={`text-gray-600 hover:text-primary-600 relative transition-colors ${
-                isActive('/wishlist') ? 'text-primary-600' : ''
+              className={`text-primary-100 hover:text-white relative transition-colors ${
+                isActive('/wishlist') ? 'text-white' : ''
               }`}
             >
               <HeartIcon className="h-6 w-6" />
+              {wishlistItemCount > 0 && (
+                <motion.span 
+                  key={wishlistItemCount}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 300, 
+                    damping: 10 
+                  }}
+                  className="absolute -top-2 -right-2 bg-white text-primary-500 text-xs rounded-full h-5 w-5 flex items-center justify-center"
+                >
+                  {wishlistItemCount}
+                </motion.span>
+              )}
             </Link>
 
             <Link 
               to="/cart" 
-              className={`text-gray-600 hover:text-primary-600 relative transition-colors ${
-                isActive('/cart') ? 'text-primary-600' : ''
+              className={`text-primary-100 hover:text-white relative transition-colors ${
+                isActive('/cart') ? 'text-white' : ''
               }`}
             >
               <ShoppingCartIcon className="h-6 w-6" />
-              {cartItems?.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-primary-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {cartItems.length}
-                </span>
+              {itemCount > 0 && (
+                <motion.span 
+                  key={itemCount}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 300, 
+                    damping: 10 
+                  }}
+                  className="absolute -top-2 -right-2 bg-white text-primary-500 text-xs rounded-full h-5 w-5 flex items-center justify-center"
+                >
+                  {itemCount}
+                </motion.span>
               )}
             </Link>
 
@@ -119,57 +152,57 @@ const Navbar = () => {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                  className="flex items-center space-x-2 text-gray-600 hover:text-primary-600 focus:outline-none"
+                  className="flex items-center space-x-2 text-primary-100 hover:text-white focus:outline-none"
                 >
                   {currentUser.photoURL ? (
                     <img
                       src={currentUser.photoURL}
                       alt="Profile"
-                      className="h-8 w-8 rounded-full object-cover border-2 border-primary-600"
+                      className="h-8 w-8 rounded-full object-cover border-2 border-white"
                     />
                   ) : (
-                    <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
-                      <UserIcon className="h-5 w-5 text-primary-600" />
+                    <div className="h-8 w-8 rounded-full bg-primary-600 flex items-center justify-center">
+                      <UserIcon className="h-5 w-5 text-white" />
                     </div>
                   )}
                   <ChevronDownIcon className="h-4 w-4" />
                 </button>
 
                 {isProfileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-100">
-                    <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-900">
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-primary-100">
+                    <div className="px-4 py-2 border-b border-primary-100">
+                      <p className="text-sm font-medium text-primary-900">
                         {currentUser.displayName || 'User'}
                       </p>
-                      <p className="text-xs text-gray-500 truncate">
+                      <p className="text-xs text-primary-600 truncate">
                         {currentUser.email}
                       </p>
                     </div>
                     
                     <Link
                       to="/profile"
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      className="flex items-center px-4 py-2 text-sm text-primary-700 hover:bg-primary-50"
                       onClick={() => setIsProfileDropdownOpen(false)}
                     >
-                      <UserIcon className="h-4 w-4 mr-2" />
+                      <UserIcon className="h-4 w-4 mr-2 text-primary-600" />
                       Profile
                     </Link>
                     
                     <Link
                       to="/notifications"
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      className="flex items-center px-4 py-2 text-sm text-primary-700 hover:bg-primary-50"
                       onClick={() => setIsProfileDropdownOpen(false)}
                     >
-                      <BellIcon className="h-4 w-4 mr-2" />
+                      <BellIcon className="h-4 w-4 mr-2 text-primary-600" />
                       Notifications
                     </Link>
                     
                     <Link
                       to="/settings"
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      className="flex items-center px-4 py-2 text-sm text-primary-700 hover:bg-primary-50"
                       onClick={() => setIsProfileDropdownOpen(false)}
                     >
-                      <Cog6ToothIcon className="h-4 w-4 mr-2" />
+                      <Cog6ToothIcon className="h-4 w-4 mr-2 text-primary-600" />
                       Settings
                     </Link>
                     
@@ -186,7 +219,7 @@ const Navbar = () => {
             ) : (
               <Link
                 to="/signin"
-                className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 transition-colors"
+                className="inline-flex items-center justify-center px-4 py-2 border border-white text-sm font-medium rounded-md text-white hover:bg-primary-600 transition-colors"
               >
                 Sign in
               </Link>
@@ -197,7 +230,7 @@ const Navbar = () => {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-600 hover:text-primary-600 p-2"
+              className="text-white hover:text-primary-100 p-2"
             >
               {isMenuOpen ? (
                 <XMarkIcon className="h-6 w-6" />
@@ -216,7 +249,7 @@ const Navbar = () => {
 
       {/* Mobile Navigation Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100">
+        <div className="md:hidden bg-primary-500 border-t border-primary-600">
           <div className="px-2 pt-2 pb-3 space-y-1">
             {navigation.map((item) => (
               <Link
@@ -224,8 +257,8 @@ const Navbar = () => {
                 to={item.href}
                 className={`block px-3 py-2 text-base font-medium rounded-md ${
                   isActive(item.href)
-                    ? 'text-primary-600 bg-primary-50'
-                    : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50'
+                    ? 'text-white bg-primary-600'
+                    : 'text-primary-100 hover:text-white hover:bg-primary-600'
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
@@ -234,27 +267,54 @@ const Navbar = () => {
             ))}
           </div>
           
-          <div className="pt-4 pb-3 border-t border-gray-200">
+          <div className="pt-4 pb-3 border-t border-primary-600">
             <div className="grid grid-cols-3 gap-4 px-5">
               <Link
                 to="/wishlist"
-                className="flex flex-col items-center text-gray-600 hover:text-primary-600"
+                className="flex flex-col items-center text-primary-100 hover:text-white relative"
                 onClick={() => setIsMenuOpen(false)}
               >
                 <HeartIcon className="h-6 w-6" />
+                {wishlistItemCount > 0 && (
+                  <motion.span 
+                    key={wishlistItemCount}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 300, 
+                      damping: 10 
+                    }}
+                    className="absolute top-0 right-1/3 bg-white text-primary-500 text-xs rounded-full h-5 w-5 flex items-center justify-center"
+                  >
+                    {wishlistItemCount}
+                  </motion.span>
+                )}
                 <span className="text-xs mt-1">Wishlist</span>
               </Link>
 
               <Link
                 to="/cart"
-                className="flex flex-col items-center text-gray-600 hover:text-primary-600 relative"
+                className="flex flex-col items-center text-primary-100 hover:text-white relative"
                 onClick={() => setIsMenuOpen(false)}
               >
                 <ShoppingCartIcon className="h-6 w-6" />
-                {cartItems?.length > 0 && (
-                  <span className="absolute top-0 right-1/3 bg-primary-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {cartItems.length}
-                  </span>
+                {itemCount > 0 && (
+                  <motion.span 
+                    key={itemCount}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 300, 
+                      damping: 10 
+                    }}
+                    className="absolute top-0 right-1/3 bg-white text-primary-500 text-xs rounded-full h-5 w-5 flex items-center justify-center"
+                  >
+                    {itemCount}
+                  </motion.span>
                 )}
                 <span className="text-xs mt-1">Cart</span>
               </Link>
@@ -262,14 +322,14 @@ const Navbar = () => {
               {currentUser ? (
                 <Link
                   to="/profile"
-                  className="flex flex-col items-center text-gray-600 hover:text-primary-600"
+                  className="flex flex-col items-center text-primary-100 hover:text-white"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {currentUser.photoURL ? (
                     <img
                       src={currentUser.photoURL}
                       alt="Profile"
-                      className="h-6 w-6 rounded-full"
+                      className="h-6 w-6 rounded-full border-2 border-white"
                     />
                   ) : (
                     <UserIcon className="h-6 w-6" />
@@ -279,7 +339,7 @@ const Navbar = () => {
               ) : (
                 <Link
                   to="/signin"
-                  className="flex flex-col items-center text-gray-600 hover:text-primary-600"
+                  className="flex flex-col items-center text-primary-100 hover:text-white"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <UserIcon className="h-6 w-6" />
